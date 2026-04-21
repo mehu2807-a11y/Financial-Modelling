@@ -11,6 +11,7 @@ warnings.filterwarnings('ignore')
 
 # --- STREAMLIT PAGE SETUP ---
 st.set_page_config(page_title="Monte Carlo Option Pricing", layout="wide")
+
 # --- GLOBAL CSS STYLING ---
 st.markdown("""
     <style>
@@ -54,7 +55,6 @@ def reset_app():
     st.session_state.run_analysis = False
 
 # --- MATH & LOGIC FUNCTIONS ---
-# FIXED: Only pass the ticker to the cache so changing parameters doesn't trigger a re-download
 @st.cache_data
 def calculate_data(ticker):
     df = yf.download(ticker, period="1y", auto_adjust=True, progress=False)
@@ -119,25 +119,11 @@ def monte_carlo_option(S0, K, T, r, sigma, dt, n_paths, option_type="call", n_ba
 # ==========================================
 if not st.session_state.run_analysis:
 
-    BACKGROUND_IMAGE_URL = "data:image/jpeg;base64,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"
-
-    # FIXED: Using background-size: 100% 100% to ensure the whole image fits without clipping
-    st.markdown(f"""
+    st.markdown("""
         <style>
-        .stApp {{
-            background-image: url("{BACKGROUND_IMAGE_URL}");
-            background-size: 100% 100%;
-            background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-        }}
-        .stApp::before {{
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 20, 25, 0.85);
-            z-index: -1;
-        }}
+        .stApp {
+            background-color: #0f1419;
+        }
         </style>
     """, unsafe_allow_html=True)
 
@@ -173,7 +159,6 @@ else:
     # --- DASHBOARD BANNER IMAGE STRIP ---
     DASHBOARD_BANNER_URL = "https://iitgn.ac.in/assets/img/IITGN-5.png"
 
-    # FIXED: CSS Adjusted for complete image display
     st.markdown(f"""
         <div style="
             width: 100%;
@@ -190,7 +175,6 @@ else:
 
     with st.spinner("Processing computational models and executing Monte Carlo iterations..."):
 
-        # FIXED: Only pass ticker here based on the updated @st.cache_data logic above
         prices, log_returns, mu_daily, sigma_daily, mu_annual, sigma_annual, S0, dt = calculate_data(
             st.session_state.ticker_input
         )
@@ -494,7 +478,6 @@ else:
         * **$\text{SE}$:** The standard error of the Monte Carlo estimate.
         """)
 
-
     with tab_market:
         st.subheader("Empirical Market Parameters")
         st.write(f"Parameters extracted from 1-year historical pricing data for **{st.session_state.ticker_input}**")
@@ -561,7 +544,6 @@ else:
         **Analytical Summary:** These charts compare the option premiums calculated via the analytical Black-Scholes formula against the simulated Monte Carlo results across a range of strike prices. The shaded regions denote the 95% Confidence Interval corresponding to the Monte Carlo standard error. As expected, call values decline monotonically with increasing strike prices, while put values increase.
         """)
 
-    # FIXED: Re-wrote the Options Greeks section as requested
     with tab_greeks:
         K_atm = round(S0)
         greeks = bs_greeks(S0, K_atm, st.session_state.T_input, st.session_state.r_input, sigma_annual)
